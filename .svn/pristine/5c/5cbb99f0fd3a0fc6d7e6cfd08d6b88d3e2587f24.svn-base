@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:comp="http://java.sun.com/jsf/composite/comp">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.ArticulosTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="tools">
+            <comp:editTools controller="#{articulosList}" />
+        </ui:define>
+        <ui:define name="dataTableSection">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_IDArticulo}" for="IDArticulo" />
+                    <h:inputText id="IDArticulo" value="#{articulosController.selected.IDArticulo}" title="#{bundle.EditArticulosTitle_IDArticulo}" required="true" requiredMessage="#{bundle.EditArticulosRequiredMessage_IDArticulo}"/>
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_articulo}" for="articulo" />
+                    <h:inputText id="articulo" value="#{articulosController.selected.articulo}" title="#{bundle.EditArticulosTitle_articulo}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_almacen}" for="almacen" />
+                    <h:inputText id="almacen" value="#{articulosController.selected.almacen}" title="#{bundle.EditArticulosTitle_almacen}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_localizacion}" for="localizacion" />
+                    <h:inputText id="localizacion" value="#{articulosController.selected.localizacion}" title="#{bundle.EditArticulosTitle_localizacion}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_costoBenef1}" for="costoBenef1" />
+                    <h:inputText id="costoBenef1" value="#{articulosController.selected.costoBenef1}" title="#{bundle.EditArticulosTitle_costoBenef1}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_costoBenef2}" for="costoBenef2" />
+                    <h:inputText id="costoBenef2" value="#{articulosController.selected.costoBenef2}" title="#{bundle.EditArticulosTitle_costoBenef2}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_cuotaRecup1}" for="cuotaRecup1" />
+                    <h:inputText id="cuotaRecup1" value="#{articulosController.selected.cuotaRecup1}" title="#{bundle.EditArticulosTitle_cuotaRecup1}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_cuotaRecup2}" for="cuotaRecup2" />
+                    <h:inputText id="cuotaRecup2" value="#{articulosController.selected.cuotaRecup2}" title="#{bundle.EditArticulosTitle_cuotaRecup2}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_reorden1}" for="reorden1" />
+                    <h:inputText id="reorden1" value="#{articulosController.selected.reorden1}" title="#{bundle.EditArticulosTitle_reorden1}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_reorden2}" for="reorden2" />
+                    <h:inputText id="reorden2" value="#{articulosController.selected.reorden2}" title="#{bundle.EditArticulosTitle_reorden2}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_cantidadUni}" for="cantidadUni" />
+                    <h:inputText id="cantidadUni" value="#{articulosController.selected.cantidadUni}" title="#{bundle.EditArticulosTitle_cantidadUni}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_peso}" for="peso" />
+                    <h:inputText id="peso" value="#{articulosController.selected.peso}" title="#{bundle.EditArticulosTitle_peso}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_factor}" for="factor" />
+                    <h:inputText id="factor" value="#{articulosController.selected.factor}" title="#{bundle.EditArticulosTitle_factor}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_PMercado1}" for="PMercado1" />
+                    <h:inputText id="PMercado1" value="#{articulosController.selected.PMercado1}" title="#{bundle.EditArticulosTitle_PMercado1}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_PMercado2}" for="PMercado2" />
+                    <h:inputText id="PMercado2" value="#{articulosController.selected.PMercado2}" title="#{bundle.EditArticulosTitle_PMercado2}" />
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_IDVariedad}" for="IDVariedad" />
+                    <h:selectOneMenu id="IDVariedad" value="#{articulosController.selected.IDVariedad}" title="#{bundle.EditArticulosTitle_IDVariedad}" >
+                        <f:selectItems value="#{variedadController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_unidadMed2}" for="unidadMed2" />
+                    <h:selectOneMenu id="unidadMed2" value="#{articulosController.selected.unidadMed2}" title="#{bundle.EditArticulosTitle_unidadMed2}" >
+                        <f:selectItems value="#{unidadController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_unidadMed1}" for="unidadMed1" />
+                    <h:selectOneMenu id="unidadMed1" value="#{articulosController.selected.unidadMed1}" title="#{bundle.EditArticulosTitle_unidadMed1}" >
+                        <f:selectItems value="#{unidadController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_IDGrupoRef}" for="IDGrupoRef" />
+                    <h:selectOneMenu id="IDGrupoRef" value="#{articulosController.selected.IDGrupoRef}" title="#{bundle.EditArticulosTitle_IDGrupoRef}" >
+                        <f:selectItems value="#{grupoRefController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_IDGrupoAlim}" for="IDGrupoAlim" />
+                    <h:selectOneMenu id="IDGrupoAlim" value="#{articulosController.selected.IDGrupoAlim}" title="#{bundle.EditArticulosTitle_IDGrupoAlim}" >
+                        <f:selectItems value="#{grupoAlimController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.EditArticulosLabel_IDDonante}" for="IDDonante" />
+                    <h:selectOneMenu id="IDDonante" value="#{articulosController.selected.IDDonante}" title="#{bundle.EditArticulosTitle_IDDonante}" >
+                        <f:selectItems value="#{donantesController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+                <h:commandLink action="#{articulosController.update}" value="#{bundle.EditArticulosSaveLink}"/>
+                <br />
+                <br />
+                <h:commandLink action="View" value="#{bundle.EditArticulosViewLink}" immediate="true"/>
+                <br />
+                <h:commandLink action="#{articulosController.prepareList}" value="#{bundle.EditArticulosShowAllLink}" immediate="true"/>
+                <br />
+                <br />
+                <h:commandLink value="#{bundle.EditArticulosIndexLink}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

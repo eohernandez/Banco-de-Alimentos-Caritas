@@ -1,0 +1,42 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.caritas.facade;
+
+import com.caritas.entity.EncSocioNutriciaInd;
+import com.caritas.entity.EncSocioNutriciaIndPK;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+/**
+ *
+ * @author tecnologia
+ */
+@Stateless
+public class EncSocioNutriciaIndFacade extends AbstractFacade<EncSocioNutriciaInd> {
+    @PersistenceContext(unitName = "BACMty-ejbPU")
+    private EntityManager em;
+
+    @Override
+    protected EntityManager getEntityManager() {
+        return em;
+    }
+
+    public EncSocioNutriciaIndFacade() {
+        super(EncSocioNutriciaInd.class);
+    }
+
+    public List<EncSocioNutriciaInd> findByIDEnc(int exp, char areaGeo) {
+        Query q = getEntityManager().createNamedQuery("EncSocioNutriciaInd.findByExpedienteArea");
+        
+        q.setParameter("expediente", exp);
+        q.setParameter("areaGeo", areaGeo);
+        
+        return q.getResultList();
+    }
+    
+}

@@ -1,0 +1,118 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.caritas.facade;
+
+import com.caritas.entity.EncSocioNutricia;
+import com.caritas.entity.EncSocioNutriciaPK;
+import com.caritas.entity.Preguntas;
+import com.caritas.entity.Respuestas;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+/**
+ *
+ * @author tecnologia
+ */
+@Stateless
+public class EncSocioNutriciaFacade extends AbstractFacade<EncSocioNutricia> {
+    @PersistenceContext(unitName = "BACMty-ejbPU")
+    private EntityManager em;
+
+    @Override
+    protected EntityManager getEntityManager() {
+        return em;
+    }
+
+    public EncSocioNutriciaFacade() {
+        super(EncSocioNutricia.class);
+    }
+
+    @Override
+    public List<EncSocioNutricia> findAll() {
+        Query q = getEntityManager().createNamedQuery("EncSocioNutricia.findByStatus");
+        
+        q.setParameter("status", true);
+        
+        return q.getResultList();
+    }
+    
+    public EncSocioNutricia find(EncSocioNutriciaPK id, boolean status) {
+        Query q = getEntityManager().createNamedQuery("EncSocioNutricia.findByIdStatus");
+        
+        q.setParameter("id", id);
+        q.setParameter("status", status);
+        
+        try {
+            return (EncSocioNutricia) q.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        } catch (NonUniqueResultException e) {
+            return (EncSocioNutricia) q.getResultList().get(0);
+        } 
+    }
+
+    public String findPregFam(int idPregunta) {
+        Query q = getEntityManager().createNamedQuery("Preguntas.findByIDPregunta");
+        q.setParameter("iDPregunta", idPregunta);
+        
+        Preguntas pregunta;
+        
+        try {
+            pregunta = (Preguntas) q.getSingleResult();
+        } catch (NoResultException nre) {
+            return "Pregunta " +idPregunta;
+        }
+        
+        return pregunta.getDescripcion();
+    }
+
+    public String findRespFam(int idPregunta, int idRespuesta) {
+        Query q = getEntityManager().createNamedQuery("Respuestas.findByIDPreguntaIDRespuesta");
+        q.setParameter("iDPregunta", idPregunta);
+        q.setParameter("iDRespuesta", idRespuesta);
+        
+        Respuestas respuesta;
+        
+        try {
+            respuesta = (Respuestas) q.getSingleResult();
+        } catch (NoResultException nre) {
+            return "Respuesta " +idRespuesta;
+        }
+        
+        return respuesta.getDescripcion();
+        
+    }
+    
+    public List<Integer> findLike(String query, char areaGeo, boolean status) {
+        int expediente = Integer.valueOf(query);
+        
+        Query q = getEntityManager().createNamedQuery("EncSocioNutricia.findLike");
+        
+        q.setParameter("expediente", expediente + "%");
+        q.setParameter("areaGeo", areaGeo);
+        q.setParameter("status", status);
+        
+        return q.getResultList();
+    }
+    
+    public List<String> findAllIDEncuestas() {
+        Query q = getEntityManager().createNamedQuery("EncSocioNutricia.findAllIds");
+        
+        return q.getResultList();
+    }
+
+    public int findLastExp(char area) {
+        Query q = getEntityManager().createNamedQuery("EncSocioNutricia.findLastExpByArea");
+        
+        q.setParameter("areaGeo", area);
+        q.setMaxResults(1);
+        return (Integer) q.getSingleResult();
+    }
+}

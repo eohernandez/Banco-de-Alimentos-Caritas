@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.CreateReciboTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDFolio}" for="IDFolio" />
+                    <h:inputText id="IDFolio" value="#{reciboController.selected.IDFolio}" title="#{bundle.CreateReciboTitle_IDFolio}" required="true" requiredMessage="#{bundle.CreateReciboRequiredMessage_IDFolio}"/>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_tipoMov}" for="tipoMov" />
+                    <h:inputText id="tipoMov" value="#{reciboController.selected.tipoMov}" title="#{bundle.CreateReciboTitle_tipoMov}" required="true" requiredMessage="#{bundle.CreateReciboRequiredMessage_tipoMov}"/>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_fechaMov}" for="fechaMov" />
+                    <h:inputText id="fechaMov" value="#{reciboController.selected.fechaMov}" title="#{bundle.CreateReciboTitle_fechaMov}" required="true" requiredMessage="#{bundle.CreateReciboRequiredMessage_fechaMov}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_folioDon}" for="folioDon" />
+                    <h:inputText id="folioDon" value="#{reciboController.selected.folioDon}" title="#{bundle.CreateReciboTitle_folioDon}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_factura}" for="factura" />
+                    <h:inputText id="factura" value="#{reciboController.selected.factura}" title="#{bundle.CreateReciboTitle_factura}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDSucursal}" for="IDSucursal" />
+                    <h:inputText id="IDSucursal" value="#{reciboController.selected.IDSucursal}" title="#{bundle.CreateReciboTitle_IDSucursal}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_origen}" for="origen" />
+                    <h:inputText id="origen" value="#{reciboController.selected.origen}" title="#{bundle.CreateReciboTitle_origen}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_statusMov}" for="statusMov" />
+                    <h:inputText id="statusMov" value="#{reciboController.selected.statusMov}" title="#{bundle.CreateReciboTitle_statusMov}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_familias}" for="familias" />
+                    <h:inputText id="familias" value="#{reciboController.selected.familias}" title="#{bundle.CreateReciboTitle_familias}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_integrantes}" for="integrantes" />
+                    <h:inputText id="integrantes" value="#{reciboController.selected.integrantes}" title="#{bundle.CreateReciboTitle_integrantes}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_folioEntrada}" for="folioEntrada" />
+                    <h:inputText id="folioEntrada" value="#{reciboController.selected.folioEntrada}" title="#{bundle.CreateReciboTitle_folioEntrada}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_descuento}" for="descuento" />
+                    <h:inputText id="descuento" value="#{reciboController.selected.descuento}" title="#{bundle.CreateReciboTitle_descuento}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_paquete}" for="paquete" />
+                    <h:inputText id="paquete" value="#{reciboController.selected.paquete}" title="#{bundle.CreateReciboTitle_paquete}" />
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_fechaSist}" for="fechaSist" />
+                    <h:inputText id="fechaSist" value="#{reciboController.selected.fechaSist}" title="#{bundle.CreateReciboTitle_fechaSist}" >
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDRecibo}" for="IDRecibo" />
+                    <h:inputText id="IDRecibo" value="#{reciboController.selected.IDRecibo}" title="#{bundle.CreateReciboTitle_IDRecibo}" required="true" requiredMessage="#{bundle.CreateReciboRequiredMessage_IDRecibo}"/>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDUsuario}" for="IDUsuario" />
+                    <h:selectOneMenu id="IDUsuario" value="#{reciboController.selected.IDUsuario}" title="#{bundle.CreateReciboTitle_IDUsuario}" >
+                        <f:selectItems value="#{usuariosController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDSucursales}" for="IDSucursales" />
+                    <h:selectOneMenu id="IDSucursales" value="#{reciboController.selected.IDSucursales}" title="#{bundle.CreateReciboTitle_IDSucursales}" >
+                        <f:selectItems value="#{sucursalesController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDProveedor}" for="IDProveedor" />
+                    <h:selectOneMenu id="IDProveedor" value="#{reciboController.selected.IDProveedor}" title="#{bundle.CreateReciboTitle_IDProveedor}" >
+                        <f:selectItems value="#{proveedoresController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDPrograma}" for="IDPrograma" />
+                    <h:selectOneMenu id="IDPrograma" value="#{reciboController.selected.IDPrograma}" title="#{bundle.CreateReciboTitle_IDPrograma}" >
+                        <f:selectItems value="#{programasController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDInstitucion}" for="IDInstitucion" />
+                    <h:selectOneMenu id="IDInstitucion" value="#{reciboController.selected.IDInstitucion}" title="#{bundle.CreateReciboTitle_IDInstitucion}" >
+                        <f:selectItems value="#{institucionesController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDGrupoRef}" for="IDGrupoRef" />
+                    <h:selectOneMenu id="IDGrupoRef" value="#{reciboController.selected.IDGrupoRef}" title="#{bundle.CreateReciboTitle_IDGrupoRef}" >
+                        <f:selectItems value="#{grupoRefController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDDonante}" for="IDDonante" />
+                    <h:selectOneMenu id="IDDonante" value="#{reciboController.selected.IDDonante}" title="#{bundle.CreateReciboTitle_IDDonante}" required="true" requiredMessage="#{bundle.CreateReciboRequiredMessage_IDDonante}">
+                        <f:selectItems value="#{donantesController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreateReciboLabel_IDArea}" for="IDArea" />
+                    <h:selectOneMenu id="IDArea" value="#{reciboController.selected.IDArea}" title="#{bundle.CreateReciboTitle_IDArea}" >
+                        <f:selectItems value="#{areasController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+                <br />
+                <h:commandLink action="#{reciboController.create}" value="#{bundle.CreateReciboSaveLink}" />
+                <br />
+                <br />
+                <h:commandLink action="#{reciboController.prepareList}" value="#{bundle.CreateReciboShowAllLink}" immediate="true"/>
+                <br />
+                <br />
+                <h:link outcome="/index" value="#{bundle.CreateReciboIndexLink}"/>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

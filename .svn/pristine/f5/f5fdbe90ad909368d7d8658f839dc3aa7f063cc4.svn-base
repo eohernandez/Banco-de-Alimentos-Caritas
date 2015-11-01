@@ -1,0 +1,94 @@
+package com.caritas.filters;
+
+import com.caritas.entity.Articulos;
+import com.caritas.entity.Articulos_;
+import com.caritas.entity.GrupoAlim;
+import com.caritas.entity.Variedad;
+import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+
+public class ArticulosFilters {
+
+    private String iDArticulo;
+    private String articulo;
+    private String almacen;
+    private String localizacion;
+    private GrupoAlim iDGrupoAlim;
+    private Variedad iDVariedad;
+    private static final int CANTIDAD_FILTROS = 6;
+
+    //<editor-fold defaultstate="collapsed" desc="GettersSetters">
+    public String getiDArticulo() {
+        return iDArticulo;
+    }
+
+    public void setiDArticulo(String iDArticulo) {
+        this.iDArticulo = iDArticulo;
+    }
+
+    public String getArticulo() {
+        return articulo;
+    }
+
+    public void setArticulo(String articulo) {
+        this.articulo = articulo;
+    }
+
+    public String getAlmacen() {
+        return almacen;
+    }
+
+    public void setAlmacen(String almacen) {
+        this.almacen = almacen;
+    }
+
+    public String getLocalizacion() {
+        return localizacion;
+    }
+
+    public void setLocalizacion(String localizacion) {
+        this.localizacion = localizacion;
+    }
+
+    public GrupoAlim getIDGrupoAlim() {
+        return iDGrupoAlim;
+    }
+
+    public void setIDGrupoAlim(GrupoAlim iDGrupoAlim) {
+        this.iDGrupoAlim = iDGrupoAlim;
+    }
+
+    public Variedad getIDVariedad() {
+        return iDVariedad;
+    }
+
+    public void setIDVariedad(Variedad iDVariedad) {
+        this.iDVariedad = iDVariedad;
+    }
+    //</editor-fold>
+
+    public Predicate[] ToPredicateArray(CriteriaBuilder cb, Path<Articulos> from) {
+        ArrayList<Predicate> predicates = new ArrayList<Predicate>(CANTIDAD_FILTROS);
+        if (null != iDArticulo) {
+            predicates.add(cb.equal(from.get(Articulos_.iDArticulo), iDArticulo));
+        }
+        if (null != articulo && !articulo.isEmpty()) {
+            predicates.add(cb.like(from.get(Articulos_.articulo), "%" + articulo + "%"));
+        }
+        if (null != almacen) {
+            predicates.add(cb.equal(from.get(Articulos_.almacen), almacen));
+        }
+        if (null != localizacion) {
+            predicates.add(cb.equal(from.get(Articulos_.localizacion), localizacion));
+        }
+        if (null != iDGrupoAlim) {
+            predicates.add(cb.equal(from.get(Articulos_.iDGrupoAlim), iDGrupoAlim));
+        }
+        if (null != iDVariedad) {
+            predicates.add(cb.equal(from.get(Articulos_.iDVariedad), iDVariedad));
+        }
+        return predicates.toArray(new Predicate[predicates.size()]);
+    }
+}

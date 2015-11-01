@@ -1,0 +1,314 @@
+package com.caritas.controller;
+
+import com.caritas.controller.util.JsfUtil;
+import com.caritas.controller.util.PaginationHelper;
+import com.caritas.controller.util.noRowController.DefaultNoRowController;
+import com.caritas.controller.util.noRowController.NoRowControlable;
+import com.caritas.entity.Donantes;
+import com.caritas.entity.Usuarios;
+import com.caritas.facade.DonantesFacade;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
+import javax.ejb.EJB;
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
+import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
+import javax.faces.convert.Converter;
+import javax.faces.convert.FacesConverter;
+import javax.faces.model.DataModel;
+import javax.faces.model.ListDataModel;
+import javax.faces.model.SelectItem;
+import javax.persistence.EntityExistsException;
+
+@ManagedBean(name = "donantesController")
+@SessionScoped
+public class DonantesController
+        extends DefaultNoRowController<Donantes>
+        implements Serializable, NoRowControlable {
+
+    private DataModel items = null;
+    @EJB
+    private com.caritas.facade.DonantesFacade ejbFacade;
+    private PaginationHelper pagination;
+    private int selectedItemIndex;
+
+    public DonantesController() {
+    }
+
+    public Donantes getSelected() {
+        return current;
+    }
+
+    public void setSelected(Donantes selected) {
+        current = selected;
+    }
+
+    private DonantesFacade getFacade() {
+        return ejbFacade;
+    }
+
+    public PaginationHelper getPagination() {
+        if (pagination == null) {
+            pagination = new PaginationHelper(getFacade().count()) {
+                @Override
+                public int getItemsCount() {
+                    return getFacade().count();
+                }
+
+                @Override
+                public DataModel createPageDataModel() {
+                    return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+                }
+            };
+        }
+        return pagination;
+    }
+
+    @Override
+    public String prepareList() {
+        current = null;
+        recreateModel();
+        return "List";
+    }
+
+    public String prepareView() {
+        current = (Donantes) getItems().getRowData();
+        selectedItemIndex = getPagination().getPageFirstItem() + getItems().getRowIndex();
+        return "View";
+    }
+
+    Donantes newDefaultDonantes() {
+        Donantes defaultDonantes = new Donantes();
+        Usuarios username = JsfUtil.getLoggedUser();
+        defaultDonantes.setUsuarioAlta(username.getNombre());
+        defaultDonantes.setFechaAlta(new Date());
+        defaultDonantes.setFrecuencia("O");
+        defaultDonantes.setMail("@");
+        return defaultDonantes;
+    }
+
+    public String prepareCreate() {
+        current = newDefaultDonantes();
+        selectedItemIndex = -1;
+        return "Create";
+    }
+
+    public String create() {
+        current.setTipoDonante(current.getIDTipoDon().getIDTipoDon());
+        try {
+            getFacade().create(current);
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("DonantesCreated"));
+            recreateModel();
+            return prepareCreate();
+        } catch (EntityExistsException eee) {
+            JsfUtil.addErrorMessage(eee, ResourceBundle.getBundle("/Bundle").getString("El registro ya existe"));
+            return null;
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return null;
+        }
+    }
+
+    public String prepareEdit() {
+        current = (Donantes) getItems().getRowData();
+        selectedItemIndex = getPagination().getPageFirstItem() + getItems().getRowIndex();
+        return "Edit";
+    }
+
+    public String update() {
+        if (!isPersisting()) {
+            JsfUtil.addErrorMessage("El registro de donante ya no existe");
+            return prepareList();
+        }
+        current.setTipoDonante(current.getIDTipoDon().getIDTipoDon());
+        try {
+            getFacade().edit(current);
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("DonantesUpdated"));
+            return "View";
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return null;
+        }
+    }
+
+    public String destroy() {
+        current = (Donantes) getItems().getRowData();
+        selectedItemIndex = getPagination().getPageFirstItem() + getItems().getRowIndex();
+        performDestroy();
+        recreatePagination();
+        recreateModel();
+        current = null;
+        return "List";
+    }
+
+    public String destroyAndView() {
+        performDestroy();
+        recreateModel();
+        updateCurrentItem();
+        if (selectedItemIndex >= 0) {
+            return "View";
+        } else {
+            // all items were removed - go back to list
+            recreateModel();
+            return "List";
+        }
+    }
+
+    public boolean isPersisting() {
+        DonantesFacade facade = getFacade();
+        if (current == null) {
+            return false;
+        }
+        if (facade.find(current.getIDDonante()) == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void performDestroy() {
+        if (!isPersisting()) {
+            JsfUtil.addErrorMessage("El registro no existe");
+            return;
+        }
+        try {
+            getFacade().remove(current);
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("DonantesDeleted"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+        }
+    }
+
+    private void updateCurrentItem() {
+        int count = getFacade().count();
+        if (selectedItemIndex >= count) {
+            // selected index cannot be bigger than number of items:
+            selectedItemIndex = count - 1;
+            // go to previous page if last page disappeared:
+            if (getPagination().getPageFirstItem() >= count) {
+                getPagination().previousPage();
+            }
+        }
+        if (selectedItemIndex >= 0) {
+            current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
+        }
+    }
+
+    public DataModel getItems() {
+        if (items == null) {
+            recreatePagination();
+            items = getPagination().createPageDataModel();
+        }
+        return items;
+    }
+
+    private void recreateModel() {
+        items = null;
+    }
+
+    private void recreatePagination() {
+        pagination = null;
+    }
+
+    public String next() {
+        getPagination().nextPage();
+        recreateModel();
+        return "List";
+    }
+
+    public String previous() {
+        getPagination().previousPage();
+        recreateModel();
+        return "List";
+    }
+
+    public SelectItem[] getItemsAvailableSelectMany() {
+        return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
+    }
+
+    public SelectItem[] getItemsAvailableSelectOne() {
+        return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    public SelectItem[] getItemsAvailableSucursalesSelectOne(boolean sucursales) {
+        return JsfUtil.getSelectItems(ejbFacade.findBySucursales(sucursales), false);
+    }
+
+    @Override
+    public String destroyNoRow() {
+        if (current == null) {
+            JsfUtil.addErrorMessage("Seleccione un dato a dar de Baja");
+            return null;
+        }
+        if (destroyValidate()) {
+            performDestroy();
+            recreateModel();
+            recreatePagination();
+            current = null;
+            return "List";
+        } else {
+            JsfUtil.addErrorMessage("No se puede dar de baja");
+            return "";
+        }
+    }
+
+    @FacesConverter(forClass = Donantes.class)
+    public static class DonantesControllerConverter implements Converter {
+
+        public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
+            if (value == null || value.length() == 0) {
+                return null;
+            }
+            DonantesController controller = (DonantesController) facesContext.getApplication().getELResolver().
+                    getValue(facesContext.getELContext(), null, "donantesController");
+            return controller.ejbFacade.find(getKey(value));
+        }
+
+        java.lang.String getKey(String value) {
+            java.lang.String key;
+            key = value;
+            return key;
+        }
+
+        String getStringKey(java.lang.String value) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(value);
+            return sb.toString();
+        }
+
+        public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
+            if (object == null) {
+                return null;
+            }
+            if (object instanceof Donantes) {
+                Donantes o = (Donantes) object;
+                return getStringKey(o.getIDDonante());
+            } else {
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + DonantesController.class.getName());
+            }
+        }
+    }
+
+    @ManagedBean(name = "donantesCompleter")
+    @ApplicationScoped
+    public static class DonantesCompleter {
+
+        @EJB
+        private DonantesFacade donantes;
+        @ManagedProperty("#{parametersController.suggestionLength}")
+        private int length;
+
+        public List<Donantes> complete(String query) {
+            return donantes.findLike(query, length);
+        }
+
+        public void setLength(int suggestionsLength) {
+            this.length = suggestionsLength;
+        }
+    }
+}

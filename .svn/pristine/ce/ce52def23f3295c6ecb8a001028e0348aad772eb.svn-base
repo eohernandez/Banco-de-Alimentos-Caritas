@@ -1,0 +1,1268 @@
+package com.caritas.controller;
+
+import com.caritas.controller.util.EncSocioNutriciaUtil;
+import com.caritas.entity.EncSocioNutricia;
+import com.caritas.controller.util.JsfUtil;
+import com.caritas.entity.EncSocioNutriciaFam;
+import com.caritas.entity.EncSocioNutriciaFamPK;
+import com.caritas.entity.EncSocioNutriciaInd;
+import com.caritas.entity.EncSocioNutriciaIndPK;
+import com.caritas.entity.EncSocioNutriciaPK;
+import com.caritas.facade.EncSocioNutriciaFacade;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.ViewScoped;
+import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
+import javax.faces.convert.Converter;
+import javax.faces.convert.FacesConverter;
+import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpServletRequest;
+import org.primefaces.context.RequestContext;
+
+@ManagedBean(name = "encSocioNutriciaController")
+@ViewScoped
+public class EncSocioNutriciaController implements Serializable {
+
+    private EncSocioNutricia current;
+    private List<EncSocioNutricia> currentList;
+    @EJB
+    private com.caritas.facade.EncSocioNutriciaFacade ejbFacade;
+    private List<EncSocioNutriciaInd> integrantes;
+    private EncSocioNutriciaInd integranteDialog;
+    private EncSocioNutriciaFam pregRespFamiliares;
+    private double totalEgresos;
+    private EncSocioNutriciaFam pregRespFamiliaresAux;
+    private EncSocioNutriciaInd integranteAux;
+    private double p18Numero;
+    private String p18String;
+    private boolean embarazo;
+    private boolean otroParentesco = false;
+    private String otroParentescoString;
+    private boolean otraRamaAct = false;
+    private String otraRamaActString;
+    private boolean otroSeguroSocial = false;
+    private String otroSeguroSocialString;
+    private boolean otraAyudaAlimentaria = false;
+    private String otraAyudaAlimentariaString;
+    private boolean otroGrupoEtnico = false;
+    private String otroGrupoEtnicoString;
+    private boolean otroPreg9 = false;
+    private String otroPreg9String;
+    private boolean otroPreg12 = false;
+    private String otroPreg12String;
+    private boolean otroPreg30 = false;
+    private String otroPreg30String;
+    @ManagedProperty(value = "#{encSocioNutriciaFamController}")
+    private EncSocioNutriciaFamController famController;
+    @ManagedProperty(value = "#{encSocioNutriciaIndController}")
+    private EncSocioNutriciaIndController indController;
+    private boolean idSelected = false;
+    private boolean areaGeoSelected = false;
+
+    public EncSocioNutriciaController() {
+    }
+
+    @PostConstruct
+    private void inicio() {
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        String path = request.getRequestURI();
+
+        Map<String, Object> params = FacesContext.getCurrentInstance()
+                .getExternalContext().getSessionMap();
+
+        if (path.endsWith("View.xhtml") || path.endsWith("Edit.xhtml")) {
+
+            if (params.get("encuesta") != null) {
+                int exp = ((EncSocioNutriciaPK) params.get("encuesta")).getExpediente();
+                char area = ((EncSocioNutriciaPK) params.get("encuesta")).getAreaGeo();
+
+                current = new EncSocioNutricia(exp, area);
+                viewSelectId(true);
+                areaGeoSelected = true;
+            }
+        }
+    }
+
+    public EncSocioNutricia getSelected() {
+        if (current == null) {
+            current = new EncSocioNutricia();
+            current.setEncSocioNutriciaPK(new EncSocioNutriciaPK());
+        }
+
+        return current;
+    }
+
+    public List<EncSocioNutricia> getCurrentList() {
+        if (currentList == null) {
+            currentList = getFacade().findAll();
+        }
+        return currentList;
+    }
+
+    private EncSocioNutriciaFacade getFacade() {
+        return ejbFacade;
+    }
+
+    public String prepareList() {
+        return "List?faces-redirect=true";
+    }
+
+    public String prepareView() {
+        Map<String, Object> map = FacesContext.getCurrentInstance().getExternalContext()
+                .getSessionMap();
+        map.put("encuesta", getSelected().getEncSocioNutriciaPK());
+
+        return "View?faces-redirect=true";
+    }
+
+    public String prepareViewFromListRow(EncSocioNutricia encuesta) {
+        Map<String, Object> map = FacesContext.getCurrentInstance().getExternalContext()
+                .getSessionMap();
+        map.put("encuesta", getSelected().getEncSocioNutriciaPK());
+
+        return "View?faces-redirect=true";
+    }
+
+    public String prepareCreate() {
+        return "Create?faces-redirect=true";
+    }
+
+    public String prepareEdit() {
+        Map<String, Object> map = FacesContext.getCurrentInstance().getExternalContext()
+                .getSessionMap();
+        map.put("encuesta", getSelected().getEncSocioNutriciaPK());
+
+        return "Edit?faces-redirect=true";
+    }
+
+    public String prepareEditFromListRow(EncSocioNutricia encuesta) {
+        Map<String, Object> map = FacesContext.getCurrentInstance().getExternalContext()
+                .getSessionMap();
+        map.put("encuesta", getSelected().getEncSocioNutriciaPK());
+
+        return "Edit?faces-redirect=true";
+    }
+    
+    public String prepareReactivar() {
+        return "ReactivarEncuesta?faces-redirect=true";
+    }
+
+    public void destroy() {
+        if (getSelected().getEncSocioNutriciaPK() != null) {
+            current = getEncSocioNutricia(new EncSocioNutriciaPK(
+                    current.getEncSocioNutriciaPK().getExpediente(), current.getEncSocioNutriciaPK().getAreaGeo()), true);
+            if (current != null) {
+                deactivateEnc();
+            }
+        } else {
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("RequiredMessage_NullSelected_Key"));
+        }
+    }
+
+    private void deactivateEnc() {
+        current.setStatus(false);
+        ejbFacade.edit(current);
+    }
+
+    public String deactivateFromListRow(EncSocioNutricia encuesta) {
+        try {
+            current = encuesta;
+
+            deactivateEnc();
+
+            return "List?faces-redirect=true";
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("Error_Generico"));
+            return null;
+        }
+    }
+    
+    public void reactivarEncuesta() {
+        current.setStatus(true);
+        ejbFacade.edit(current);
+        limpiaPantalla();
+    }
+
+    public SelectItem[] getItemsAvailableSelectMany() {
+        return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
+    }
+
+    public SelectItem[] getItemsAvailableSelectOne() {
+        return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    public EncSocioNutricia getEncSocioNutricia(EncSocioNutriciaPK id, boolean status) {
+        return ejbFacade.find(id, status);
+    }
+
+    public List<Integer> completeExpediente(String query) {
+        return getFacade().findLike(query, getSelected().getEncSocioNutriciaPK().getAreaGeo(), true);
+    }
+    
+    public List<Integer> completeExpedienteDesactivado(String query) {
+        return getFacade().findLike(query, getSelected().getEncSocioNutriciaPK().getAreaGeo(), false);
+    }
+
+    public void viewSelectId(boolean status) {
+        char areaGeoTemp = getSelected().getEncSocioNutriciaPK().getAreaGeo();
+        current = getEncSocioNutricia(current.getEncSocioNutriciaPK(), status);
+        if (current != null) {
+            if (current.getStatus() == status) {
+                idSelected = true;
+                pregRespFamiliares = famController.getEncSocioNutriciaFam(
+                        new EncSocioNutriciaFamPK(
+                        current.getEncSocioNutriciaPK().getExpediente(), current.getEncSocioNutriciaPK().getAreaGeo()));
+                integrantes = indController.getListEncSocioNutriciaInd(
+                        current.getEncSocioNutriciaPK().getExpediente(), current.getEncSocioNutriciaPK().getAreaGeo());
+
+                arreglaPregsOtro();
+            } else {
+                if (areaGeoSelected) {
+                    limpiaPantalla();
+                    getSelected().setEncSocioNutriciaPK(new EncSocioNutriciaPK(0, areaGeoTemp));
+                    areaGeoSelected = true;
+                } else {
+                    limpiaPantalla();
+                }
+            }
+        } else {
+            if (areaGeoSelected) {
+                limpiaPantalla();
+                getSelected().setEncSocioNutriciaPK(new EncSocioNutriciaPK(0, areaGeoTemp));
+                areaGeoSelected = true;
+            } else {
+                limpiaPantalla();
+            }
+        }
+    }
+
+    private void arreglaPregsOtro() {
+        if (!pregRespFamiliares.getP9R().trim().isEmpty()) {
+            if (pregRespFamiliares.getP9R().startsWith("P9-R4")) {
+                otroPreg9 = true;
+                otroPreg9String = pregRespFamiliares.getP9R().substring(6);
+                pregRespFamiliares.setP9R("P9-R4");
+            }
+        }
+
+        if (!pregRespFamiliares.getP12R().trim().isEmpty()) {
+            if (pregRespFamiliares.getP12R().startsWith("P12-R6")) {
+                otroPreg12 = true;
+                otroPreg12String = pregRespFamiliares.getP12R().substring(7);
+                pregRespFamiliares.setP12R("P12-R6");
+            }
+        }
+
+        String[] split18 = pregRespFamiliares.getP18Otros().split("!");
+        p18String = split18[0];
+        p18Numero = Double.valueOf(split18[1]);
+
+        calculaTotalEgresos();
+
+        if (!pregRespFamiliares.getP30Ganado().trim().isEmpty()) {
+            if (pregRespFamiliares.getP30Ganado().startsWith("P30-R3")) {
+                otroPreg30 = true;
+                otroPreg30String = pregRespFamiliares.getP30Ganado().substring(7);
+                pregRespFamiliares.setP30Ganado("P30-R3");
+            }
+        }
+    }
+
+    private void arreglaIntegranteOtro() {
+        if (!integranteDialog.getParentesco().isEmpty()) {
+            if (integranteDialog.getParentesco().startsWith("!")) {
+                otroParentesco = true;
+                otroParentescoString = integranteDialog.getParentesco().substring(1);
+                integranteDialog.setParentesco("Otro (Especifique)");
+            }
+        }
+
+        if (!integranteDialog.getRamaActiv().isEmpty()) {
+            if (integranteDialog.getRamaActiv().startsWith("!")) {
+                otraRamaAct = true;
+                otraRamaActString = integranteDialog.getRamaActiv().substring(1);
+                integranteDialog.setRamaActiv("Otros (especifique)");
+            }
+        }
+
+        if (!integranteDialog.getSeguroSocial().isEmpty()) {
+            if (integranteDialog.getSeguroSocial().startsWith("!")) {
+                otroSeguroSocial = true;
+                otroSeguroSocialString = integranteDialog.getSeguroSocial().substring(1);
+                integranteDialog.setSeguroSocial("Otros (especifique)");
+            }
+        }
+
+        if (!integranteDialog.getAyudaAlim().isEmpty()) {
+            if (integranteDialog.getAyudaAlim().startsWith("!")) {
+                otraAyudaAlimentaria = true;
+                otraAyudaAlimentariaString = integranteDialog.getAyudaAlim().substring(1);
+                integranteDialog.setAyudaAlim("Otros (especifique)");
+            }
+        }
+
+        if (!integranteDialog.getGrupoEtnico().isEmpty()) {
+            if (integranteDialog.getGrupoEtnico().startsWith("!")) {
+                otroGrupoEtnico = true;
+                otroGrupoEtnicoString = integranteDialog.getGrupoEtnico().substring(1);
+                integranteDialog.setGrupoEtnico("Si");
+            }
+        }
+    }
+
+    private void limpiaPantalla() {
+        limpiaOtrosInt();
+        limpiaOtrosFam();
+
+        idSelected = false;
+        areaGeoSelected = false;
+
+        // :v lol
+        current = null;
+        integrantes = null;
+        integranteAux = null;
+        integranteDialog = null;
+        pregRespFamiliares = null;
+        pregRespFamiliaresAux = null;
+    }
+
+    private void limpiaOtrosInt() {
+        otroParentesco = false;
+        otroParentescoString = "";
+        otraRamaAct = false;
+        otraRamaActString = "";
+        otroSeguroSocial = false;
+        otroSeguroSocialString = "";
+        otraAyudaAlimentaria = false;
+        otraAyudaAlimentariaString = "";
+        otroGrupoEtnico = false;
+        otroGrupoEtnicoString = "";
+    }
+
+    private void limpiaOtrosFam() {
+        otroPreg9 = false;
+        otroPreg9String = "";
+        otroPreg12 = false;
+        otroPreg12String = "";
+        otroPreg30 = false;
+        otroPreg30String = "";
+        p18Numero = 0.0;
+        p18String = "";
+    }
+
+    public boolean createEnc() {
+        try {
+            current.setFechaCaptura(Hoy());
+            current.setStatus(true);
+            current.setIdentificador(JsfUtil.getLoggedUser());
+            getFacade().create(current);
+            return true;
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return false;
+        }
+    }
+
+    public boolean createEncFam() {
+        try {
+            getFamController().createFromEncSocNut(pregRespFamiliaresAux);
+
+            return true;
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return false;
+        }
+    }
+
+    public boolean createEncInd() {
+        for (EncSocioNutriciaInd miembro : integrantes) {
+            try {
+                getIndController().createFromEncSocNut(miembro,
+                        getEncSocioNutricia(getSelected().getEncSocioNutriciaPK(), true));
+            } catch (Exception e) {
+                JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean updateEnc() {
+        try {
+            getFacade().edit(current);
+            return true;
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return false;
+        }
+    }
+
+    private boolean updateEncFam() {
+        try {
+            getFamController().updateFromEncSocNut(pregRespFamiliaresAux);
+
+            return true;
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return false;
+        }
+    }
+
+    private boolean updateEncInd() {
+        for (EncSocioNutriciaInd miembro : integrantes) {
+            try {
+                getIndController().updateFromEncSocNut(miembro,
+                        getEncSocioNutricia(getSelected().getEncSocioNutriciaPK(), true));
+            } catch (Exception e) {
+                JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void destroyEnc() {
+        try {
+            EncSocioNutricia aBorrar = getEncSocioNutricia(getSelected().getEncSocioNutriciaPK(), true);
+            getFacade().remove(aBorrar);
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("Error_Generico"));
+        }
+    }
+
+    public void destroyEncFam() {
+        try {
+            getFamController().removeFromEncSocNut(
+                    new EncSocioNutriciaFamPK(current.getEncSocioNutriciaPK().getExpediente(), current.getEncSocioNutriciaPK().getAreaGeo()));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("Error_Generico"));
+        }
+
+        destroyEnc();
+    }
+
+    public void destroyEncInd() {
+        try {
+            getIndController().removeFromEncSocNut(current.getEncSocioNutriciaPK().getExpediente(), current.getEncSocioNutriciaPK().getAreaGeo());
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("Error_Generico"));
+        }
+
+        destroyEncFam();
+        destroyEnc();
+    }
+
+    public void guardar() {
+        try {
+            getPregRespFamiliares().setEncSocioNutriciaFamPK(new EncSocioNutriciaFamPK(
+                    current.getEncSocioNutriciaPK().getExpediente(), current.getEncSocioNutriciaPK().getAreaGeo()));
+
+            pregRespFamiliaresAux = getPregRespFamiliares();
+            acomodaValoresGuardar();
+
+            if (validaGuardar()) {
+                if (createEnc()) {  // Se agregó correctamente a la BD el current
+                    if (createEncFam()) { // Se agregó correctamente a la BD datos de familia
+                        if (createEncInd()) { // Se agregaron correctamente a la BD los integrantes
+                            limpiaPantalla();
+
+                            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaSuccess_Create"));
+                        } else {
+                            // Error al agregar integrantes
+                            destroyEncInd();
+                        }
+                    } else {
+                        // Error al agregar datos de Familia
+                        destroyEncFam();
+                    }
+                } else {
+                    // Error al agregar datos del current
+                    destroyEnc();
+                }
+            }
+        } catch (Exception e) {
+            arreglaPregsOtro();
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("Error_Generico"));
+        }
+    }
+
+    public void actualizar() {
+        pregRespFamiliaresAux = getPregRespFamiliares();
+        acomodaValoresGuardar();
+
+        if (validaActualizar()) {
+            if (updateEnc()) {
+                if (updateEncFam()) {
+                    if (updateEncInd()) {
+                        limpiaPantalla();
+
+                        JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaSuccess_Edit"));
+                    }
+                }
+            }
+        }
+    }
+
+    private void acomodaValoresGuardar() {
+        if (otroPreg9) {
+            if (otroPreg9String == null) {
+                otroPreg9String = "";
+            } else {
+                if (!otroPreg9String.startsWith("P9-R4 ")) {
+                    otroPreg9String = "P9-R4 " + otroPreg9String;
+                }
+            }
+            pregRespFamiliaresAux.setP9R(otroPreg9String);
+        }
+        if (otroPreg12) {
+            if (otroPreg12String == null) {
+                otroPreg12String = "";
+            } else {
+                if (!otroPreg12String.startsWith("P12-R6 ")) {
+                    otroPreg12String = "P12-R6 " + otroPreg12String;
+                }
+            }
+            pregRespFamiliaresAux.setP12R(otroPreg12String);
+        }
+
+        if (otroPreg30) {
+            if (otroPreg30String == null) {
+                otroPreg30String = "";
+            } else {
+                if (!otroPreg30String.startsWith("P30-R3 ")) {
+                    otroPreg30String = "P30-R3 " + otroPreg30String;
+                }
+            }
+            pregRespFamiliaresAux.setP30Ganado(otroPreg30String);
+        }
+    }
+
+    private boolean validaGuardar() {
+        boolean esValido = true;
+
+        if (getEncSocioNutricia(getSelected().getEncSocioNutriciaPK(), true) != null) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaError_IDNotUnique"));
+        }
+
+        if (integrantes.isEmpty()) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaEmpty_tablaIntegrantes"));
+        }
+
+        if (preg9Si()) {
+            if (pregRespFamiliaresAux.getP9R().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_RespuestaPara")
+                        + getPregunta(9));
+            }
+        }
+
+        if (preg12Si()) {
+            if (pregRespFamiliaresAux.getP12R().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_RespuestaPara")
+                        + getPregunta(12));
+            }
+        }
+
+        if (getP18String().contains("!")) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamError_InvalidoAdmiracion") + getPregunta(18));
+        } else if (esValido) {
+            p18String = getP18String() + "!" + String.valueOf(p18Numero);
+            pregRespFamiliaresAux.setP18Otros(p18String);
+        }
+
+        if (preg24Si()) {
+            if (pregRespFamiliaresAux.getP28DestinoAgricola().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_DestinoAgricola"));
+            }
+        }
+
+        if (preg29Si()) {
+            if (otroPreg30) {
+                if (otroPreg30String.trim().isEmpty()) {
+                    esValido = false;
+                    JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_OtroGanado"));
+                }
+            }
+
+            if (pregRespFamiliaresAux.getP31DestinoGanado().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_DestinoGanado"));
+            }
+        }
+
+        return esValido;
+    }
+
+    private boolean validaActualizar() {
+        boolean esValido = true;
+
+        if (integrantes.isEmpty()) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaEmpty_tablaIntegrantes"));
+        }
+
+        if (preg9Si()) {
+            if (pregRespFamiliaresAux.getP9R().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_RespuestaPara")
+                        + getPregunta(9));
+            }
+        }
+
+        if (preg12Si()) {
+            if (pregRespFamiliaresAux.getP12R().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_RespuestaPara")
+                        + getPregunta(12));
+            }
+        }
+
+        if (p18String.contains("!")) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamError_P18"
+                    + getPregunta(18)));
+        } else {
+            p18String = getP18String() + "!" + String.valueOf(p18Numero);
+            pregRespFamiliaresAux.setP18Otros(p18String);
+        }
+
+        if (preg24Si()) {
+            if (pregRespFamiliaresAux.getP28DestinoAgricola().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_DestinoAgricola"));
+            }
+        }
+
+        if (preg29Si()) {
+            if (otroPreg30) {
+                if (otroPreg30String.trim().isEmpty()) {
+                    esValido = false;
+                    JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_OtroGanado"));
+                }
+            }
+
+            if (pregRespFamiliaresAux.getP31DestinoGanado().trim().isEmpty()) {
+                esValido = false;
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaFamRequired_DestinoGanado"));
+            }
+        }
+
+        return esValido;
+    }
+
+    public Date Hoy() {
+        return new Date();
+    }
+
+    public void areaGeoChanged() {
+        getSelected()
+                .getEncSocioNutriciaPK()
+                .setExpediente(getFacade()
+                .findLastExp(getSelected().getEncSocioNutriciaPK().getAreaGeo()) + 1);
+    }
+
+    public void areaViewChanged() {
+        areaGeoSelected = true;
+
+        if (getSelected().getEncSocioNutriciaPK().getExpediente() > 0) {
+            getSelected().getEncSocioNutriciaPK().setExpediente(0);
+            idSelected = false;
+        }
+    }
+
+    public void agregaIntegrante() {
+        getIntegranteDialog().setEncSocioNutriciaIndPK(
+                new EncSocioNutriciaIndPK(getSelected().getEncSocioNutriciaPK().getExpediente(), getSelected().getEncSocioNutriciaPK().getAreaGeo(), getIntegranteDialog().getEncSocioNutriciaIndPK().getNombre()));
+
+        integranteAux = getIntegranteDialog();
+
+        acomodaValoresIntegrante();
+
+        if (validaAgregaIntegrante()) {
+            getIntegrantes().add(integranteAux);
+
+            integranteDialog = null;
+            integranteAux = null;
+
+            limpiaOtrosInt();
+
+            RequestContext.getCurrentInstance().execute("agregarInt.hide()");
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndSuccess_AgregaIntegrante"));
+        }
+    }
+
+    private void acomodaValoresIntegrante() {
+        if (otroParentesco) {
+            if (otroParentescoString == null) {
+                otroParentescoString = "";
+            } else {
+                otroParentescoString = "!" + otroParentescoString;
+            }
+            integranteAux.setParentesco(otroParentescoString);
+        }
+
+        if (otraRamaAct) {
+            if (otraRamaActString == null) {
+                otraRamaActString = "";
+            } else {
+                otraRamaActString = "!" + otraRamaActString;
+            }
+            integranteAux.setRamaActiv(otraRamaActString);
+        }
+
+        if (otroSeguroSocial) {
+            if (otroSeguroSocialString == null) {
+                otroSeguroSocialString = "";
+            } else {
+                otroSeguroSocialString = "!" + otroSeguroSocialString;
+            }
+            integranteAux.setSeguroSocial(otroSeguroSocialString);
+        }
+
+        if (otraAyudaAlimentaria) {
+            if (otraAyudaAlimentariaString == null) {
+                otraAyudaAlimentariaString = "";
+            } else {
+                otraAyudaAlimentariaString = "!" + otraAyudaAlimentariaString;
+            }
+            integranteAux.setAyudaAlim(otraAyudaAlimentariaString);
+        }
+
+        if (otroGrupoEtnico) {
+            if (otroGrupoEtnicoString == null) {
+                otroGrupoEtnicoString = "";
+            } else {
+                otroGrupoEtnicoString = "!" + otroGrupoEtnicoString;
+            }
+            integranteAux.setGrupoEtnico(otroGrupoEtnicoString);
+        }
+    }
+
+    private boolean validaAgregaIntegrante() {
+        boolean esValido = true;
+
+        if (integranteAux.getParentesco().trim().isEmpty()) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndRequired_OtroParentesco"));
+        } else if (integranteAux.getParentesco().substring(1).contains("!")) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_InvalidoAdmiracion")
+                    + ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndTitle_Parentesco"));
+        }
+
+        if (integranteAux.getGenero() == null) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_Genero"));
+        }
+
+        if (integranteAux.getPeso() <= 0) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_Peso"));
+        }
+
+        if (integranteAux.getTalla() <= 0) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_Talla"));
+        }
+
+        if (integranteAux.getRamaActiv().trim().isEmpty()) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndRequired_OtraRamaAct"));
+        } else if (integranteAux.getRamaActiv().substring(1).contains("!")) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_InvalidoAdmiracion")
+                    + ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndTitle_RamaActividad"));
+        }
+
+        if (integranteAux.getSeguroSocial().trim().isEmpty()) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndRequired_OtroSeguroSocial"));
+        } else if (integranteAux.getSeguroSocial().substring(1).contains("!")) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_InvalidoAdmiracion")
+                    + ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndTitle_SSocial"));
+        }
+
+        if (integranteAux.getProbSalud() == null) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_ProbSalud"));
+        }
+
+        if (integranteAux.getAyudaAlim().trim().isEmpty()) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndRequired_OtraAyudaAlim"));
+        } else if (integranteAux.getAyudaAlim().substring(1).contains("!")) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_InvalidoAdmiracion")
+                    + ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndTitle_AyudaAlim"));
+        }
+
+        if (integranteAux.getGrupoEtnico() == null) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_GpoEtnico"));
+        } else if (integranteAux.getGrupoEtnico().substring(1).contains("!")) {
+            esValido = false;
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndError_InvalidoAdmiracion")
+                    + ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndTitle_GpoEtnico"));
+        }
+
+        return esValido;
+    }
+
+    public void modificarIntegrante(EncSocioNutriciaInd integrante) {
+        eliminarIntegrante(integrante);
+
+        integranteDialog = integrante;
+
+        arreglaIntegranteOtro();
+
+        RequestContext.getCurrentInstance().execute("integrantesTabla.hide()");
+        RequestContext.getCurrentInstance().execute("agregarInt.show()");
+    }
+
+    public void eliminarIntegrante(EncSocioNutriciaInd integrante) {
+        getIntegrantes().remove(integrante);
+
+        if (getIntegrantes().isEmpty()) {
+            integrantes = null;
+        }
+
+        JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("EncSocioNutriciaIndSuccess_Remove")
+                + integrante.getEncSocioNutriciaIndPK().getNombre());
+    }
+
+    public void cambiaParentesco() {
+        if (getIntegranteDialog().getParentesco().startsWith("Otro")) {
+            otroParentesco = true;
+        } else {
+            otroParentescoString = "";
+            otroParentesco = false;
+        }
+    }
+
+    public void cambiaRamaAct() {
+        if (getIntegranteDialog().getRamaActiv().startsWith("Otros")) {
+            otraRamaAct = true;
+        } else {
+            otraRamaActString = "";
+            otraRamaAct = false;
+        }
+    }
+
+    public void cambiaSeguroSocial() {
+        if (getIntegranteDialog().getSeguroSocial().startsWith("Otros")) {
+            otroSeguroSocial = true;
+        } else {
+            otroSeguroSocialString = "";
+            otroSeguroSocial = false;
+        }
+    }
+
+    public void cambiaAyudaAlimentaria() {
+        if (getIntegranteDialog().getAyudaAlim().startsWith("Otros")) {
+            otraAyudaAlimentaria = true;
+        } else {
+            otraAyudaAlimentariaString = "";
+            otraAyudaAlimentaria = false;
+        }
+    }
+
+    public void cambiaEEstadoFis() {
+        if (getIntegranteDialog().getEtapaEstFis().startsWith("Embarazo")) {
+            embarazo = true;
+        } else {
+            getIntegranteDialog().setSemEmbarazo(0);
+            getIntegranteDialog().setPesoPreg(0.0);
+            embarazo = false;
+        }
+    }
+
+    public void cambiaGrupoEtnico() {
+        if (getIntegranteDialog().getGrupoEtnico().equals("Si")) {
+            otroGrupoEtnico = true;
+        } else {
+            otroGrupoEtnicoString = "";
+            otroGrupoEtnico = false;
+        }
+    }
+
+    public EncSocioNutriciaInd getIntegranteDialog() {
+        if (integranteDialog == null) {
+            integranteDialog = new EncSocioNutriciaInd();
+            integranteDialog.setEncSocioNutriciaIndPK(
+                    new EncSocioNutriciaIndPK(
+                    getSelected().getEncSocioNutriciaPK().getExpediente(), getSelected().getEncSocioNutriciaPK().getAreaGeo(), ""));
+        }
+        return integranteDialog;
+    }
+
+    public List<EncSocioNutriciaInd> getIntegrantes() {
+        if (integrantes == null) {
+            integrantes = new ArrayList<EncSocioNutriciaInd>();
+        }
+        return integrantes;
+    }
+    
+    public boolean renderPreg9() {
+        if (preg9Si()) {
+            return true;
+        } else {
+            pregRespFamiliares.setP9R(null);
+            return false;
+        }
+    }
+
+    private boolean preg9Si() {
+        return (pregRespFamiliares.getP8R().equals("P8-R2")
+                || pregRespFamiliares.getP8R().equals("P8-R3"));
+    }
+
+    public void cambiaPreg9() {
+        if (getPregRespFamiliares().getP9R().equals("P9-R4")) {
+            otroPreg9 = true;
+        } else {
+            otroPreg9String = "";
+            otroPreg9 = false;
+        }
+    }
+
+    public boolean renderPreg12() {
+        if (preg12Si()) {
+            return true;
+        } else {
+            pregRespFamiliares.setP12R(null);
+            return false;
+        }
+    }
+
+    private boolean preg12Si() {
+        return (pregRespFamiliares.getP11R().equals("P11-R2")
+                || pregRespFamiliares.getP11R().equals("P11-R3"));
+    }
+
+    public void cambiaPreg12() {
+        if (getPregRespFamiliares().getP12R().equals("P12-R6")) {
+            otroPreg12 = true;
+        } else {
+            otroPreg12String = "";
+            otroPreg12 = false;
+        }
+    }
+
+    public boolean preg14Si() {
+        return getPregRespFamiliares().getP14R().equals("P14-R1");
+    }
+
+    public void calculaTotalEgresos() {
+        totalEgresos =
+                pregRespFamiliares.getP19Alimentacion()
+                + pregRespFamiliares.getP20Luz()
+                + pregRespFamiliares.getP21Agua()
+                + pregRespFamiliares.getP22Gas()
+                + pregRespFamiliares.getP23Otros();
+    }
+
+    public boolean preg24Si() {
+        return pregRespFamiliares.getP24R().equals("P24-R1");
+    }
+
+    public boolean preg29Si() {
+        return pregRespFamiliares.getP29R().equals("P29-R1");
+    }
+
+    public void cambiaPreg30() {
+        if (getPregRespFamiliares().getP30Ganado().equals("P30-R3")) {
+            otroPreg30 = true;
+        } else {
+            otroPreg30String = "";
+            otroPreg30 = false;
+        }
+    }
+
+    public int getAnios(EncSocioNutriciaInd integrante) {
+        int anios;
+        int diaAnio;
+        Calendar fechaHoy = Calendar.getInstance();
+        Calendar fechaNac = new GregorianCalendar();
+
+        fechaNac.setTime(integrante.getFechaNacimiento());
+
+        anios = fechaHoy.get(Calendar.YEAR) - fechaNac.get(Calendar.YEAR);
+        diaAnio = fechaHoy.get(Calendar.DAY_OF_YEAR) - fechaNac.get(Calendar.DAY_OF_YEAR);
+
+        if (diaAnio < 0) {
+            anios--;
+        }
+
+        return anios;
+    }
+
+    public int getMeses(EncSocioNutriciaInd integrante) {
+        int meses;
+        int diaMes;
+        Calendar fechaHoy = Calendar.getInstance();
+        Calendar fechaNac = new GregorianCalendar();
+
+        fechaNac.setTime(integrante.getFechaNacimiento());
+
+        meses = fechaHoy.get(Calendar.MONTH) - fechaNac.get(Calendar.MONTH);
+        diaMes = fechaHoy.get(Calendar.DAY_OF_MONTH) - fechaNac.get(Calendar.DAY_OF_MONTH);
+
+        if (diaMes < 0) {
+            meses--;
+        }
+
+        if (meses < 0) {
+            meses = 12 + meses;
+        }
+
+        return meses;
+    }
+
+    public int getIndexOfIntegrantes(EncSocioNutriciaInd integrante) {
+        return integrantes.indexOf(integrante);
+    }
+
+    public String getPregunta(int indicePregunta) {
+        return getFacade().findPregFam(indicePregunta);
+    }
+
+    public String getRespuesta(int indicePregunta, int indiceRespuesta) {
+        return getFacade().findRespFam(indicePregunta, indiceRespuesta);
+    }
+
+    public SelectItem[] getComboBoxValue(int identificador) {
+        EncSocioNutriciaUtil util = new EncSocioNutriciaUtil();
+
+        String[] labels = util.getLabels(identificador);
+        int labelsSize = labels.length;
+
+        SelectItem[] items = new SelectItem[labelsSize];
+
+        for (int i = 0; i < labelsSize; i++) {
+            items[i] = new SelectItem(
+                    labels[i].substring(4), // Value
+                    labels[i]);             // Label
+        }
+        return items;
+    }
+
+    public EncSocioNutriciaFam getPregRespFamiliares() {
+        if (pregRespFamiliares == null) {
+            pregRespFamiliares = new EncSocioNutriciaFam();
+        }
+        return pregRespFamiliares;
+    }
+
+    public boolean isOtroParentesco() {
+        return otroParentesco;
+    }
+
+    public String getOtroParentescoString() {
+        return otroParentescoString;
+    }
+
+    public void setOtroParentescoString(String otroParentescoString) {
+        this.otroParentescoString = otroParentescoString;
+    }
+
+    public boolean isOtraRamaAct() {
+        return otraRamaAct;
+    }
+
+    public String getOtraRamaActString() {
+        return otraRamaActString;
+    }
+
+    public void setOtraRamaActString(String otraRamaActString) {
+        this.otraRamaActString = otraRamaActString;
+    }
+
+    public boolean isOtroSeguroSocial() {
+        return otroSeguroSocial;
+    }
+
+    public String getOtroSeguroSocialString() {
+        return otroSeguroSocialString;
+    }
+
+    public void setOtroSeguroSocialString(String otroSeguroSocialString) {
+        this.otroSeguroSocialString = otroSeguroSocialString;
+    }
+
+    public boolean isOtraAyudaAlimentaria() {
+        return otraAyudaAlimentaria;
+    }
+
+    public String getOtraAyudaAlimentariaString() {
+        return otraAyudaAlimentariaString;
+    }
+
+    public void setOtraAyudaAlimentariaString(String otraAyudaAlimentariaString) {
+        this.otraAyudaAlimentariaString = otraAyudaAlimentariaString;
+    }
+
+    public boolean isEmbarazo() {
+        return embarazo;
+    }
+
+    public boolean isOtroGrupoEtnico() {
+        return otroGrupoEtnico;
+    }
+
+    public String getOtroGrupoEtnicoString() {
+        return otroGrupoEtnicoString;
+    }
+
+    public void setOtroGrupoEtnicoString(String otroGrupoEtnicoString) {
+        this.otroGrupoEtnicoString = otroGrupoEtnicoString;
+    }
+
+    public double getP18Numero() {
+        return p18Numero;
+    }
+
+    public void setP18Numero(double p18Numero) {
+        this.p18Numero = p18Numero;
+    }
+
+    public String getP18String() {
+        if (p18String == null) {
+            p18String = "";
+        }
+        return p18String;
+    }
+
+    public void setP18String(String p18String) {
+        this.p18String = p18String;
+    }
+
+    public double getTotalEgresos() {
+        return totalEgresos;
+    }
+
+    public boolean isOtroPreg9() {
+        return otroPreg9;
+    }
+
+    public String getOtroPreg9String() {
+        return otroPreg9String;
+    }
+
+    public void setOtroPreg9String(String otroPreg9String) {
+        this.otroPreg9String = otroPreg9String;
+    }
+
+    public boolean isOtroPreg12() {
+        return otroPreg12;
+    }
+
+    public String getOtroPreg12String() {
+        return otroPreg12String;
+    }
+
+    public void setOtroPreg12String(String otroPreg12String) {
+        this.otroPreg12String = otroPreg12String;
+    }
+
+    public boolean isOtroPreg30() {
+        return otroPreg30;
+    }
+
+    public String getOtroPreg30String() {
+        return otroPreg30String;
+    }
+
+    public void setOtroPreg30String(String otroGanadoString) {
+        this.otroPreg30String = otroGanadoString;
+    }
+
+    public EncSocioNutriciaFamController getFamController() {
+        return famController;
+    }
+
+    public void setFamController(EncSocioNutriciaFamController famController) {
+        this.famController = famController;
+    }
+
+    public EncSocioNutriciaIndController getIndController() {
+        return indController;
+    }
+
+    public void setIndController(EncSocioNutriciaIndController indController) {
+        this.indController = indController;
+    }
+
+    public boolean isIdSelected() {
+        return idSelected;
+    }
+
+    public boolean isAreaGeoSelected() {
+        return areaGeoSelected;
+    }
+
+    @FacesConverter(forClass = EncSocioNutricia.class)
+    public static class EncSocioNutriciaControllerConverter implements Converter {
+
+        private static final String SEPARATOR = "#";
+        private static final String SEPARATOR_ESCAPED = "\\#";
+
+        @Override
+        public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
+            if (value == null || value.length() == 0) {
+                return null;
+            }
+            EncSocioNutriciaController controller = (EncSocioNutriciaController) facesContext.getApplication().getELResolver().
+                    getValue(facesContext.getELContext(), null, "encSocioNutriciaController");
+            return controller.getEncSocioNutricia(getKey(value), true);
+        }
+
+        com.caritas.entity.EncSocioNutriciaPK getKey(String value) {
+            com.caritas.entity.EncSocioNutriciaPK key;
+            String values[] = value.split(SEPARATOR_ESCAPED);
+            key = new com.caritas.entity.EncSocioNutriciaPK();
+            key.setExpediente(Integer.parseInt(values[0]));
+            key.setAreaGeo(values[1].charAt(0));
+            return key;
+        }
+
+        String getStringKey(com.caritas.entity.EncSocioNutriciaPK value) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(value.getExpediente());
+            sb.append(SEPARATOR);
+            sb.append(value.getAreaGeo());
+            return sb.toString();
+        }
+
+        @Override
+        public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
+            if (object == null) {
+                return null;
+            }
+            if (object instanceof EncSocioNutricia) {
+                EncSocioNutricia o = (EncSocioNutricia) object;
+                return getStringKey(o.getEncSocioNutriciaPK());
+            } else {
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName()
+                        + "; expected type: " + EncSocioNutricia.class.getName());
+            }
+        }
+    }
+}

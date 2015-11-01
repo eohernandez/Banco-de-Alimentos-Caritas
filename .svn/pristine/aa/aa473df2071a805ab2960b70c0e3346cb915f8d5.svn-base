@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:comp="http://java.sun.com/jsf/composite/comp">
+    <body>
+        <ui:composition template="/template.xhtml">
+
+            <ui:define name="title">
+                #{bundle.ArticulosTitle}
+            </ui:define>
+
+            <ui:define name="actionTitle">
+            </ui:define>
+
+            <ui:define name="tools">
+                <comp:listTools controller="#{articulosList}" />
+            </ui:define>
+
+            <ui:define name="dataTableSection">
+                <p:dataTable 
+                    value="#{articulosList.items}" paginatorPosition="bottom"
+                    widgetVar="tableWidget" id="table" var="item" lazy="true"
+                    rows="5" draggableColumns="true" paginator="true" 
+                    paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+                    resizableColumns="true" rowsPerPageTemplate="5,10,15,30" >
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_IDArticulo}" value="#{bundle.ArticulosTitle_IDArticulo}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.IDArticulo}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_articulo}" value="#{bundle.ArticulosTitle_articulo}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.articulo}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_almacen}" value="#{bundle.ArticulosTitle_almacen}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.almacen}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_localizacion}" value="#{bundle.ArticulosTitle_localizacion}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.localizacion}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_costoBenef1}" value="#{bundle.ArticulosTitle_costoBenef1}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.costoBenef1}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_costoBenef2}" value="#{bundle.ArticulosTitle_costoBenef2}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.costoBenef2}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_cuotaRecup1}" value="#{bundle.ArticulosTitle_cuotaRecup1}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.cuotaRecup1}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_cuotaRecup2}" value="#{bundle.ArticulosTitle_cuotaRecup2}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.cuotaRecup2}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_reorden1}" value="#{bundle.ArticulosTitle_reorden1}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.reorden1}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_reorden2}" value="#{bundle.ArticulosTitle_reorden2}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.reorden2}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_cantidadUni}" value="#{bundle.ArticulosTitle_cantidadUni}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.cantidadUni}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_peso}" value="#{bundle.ArticulosTitle_peso}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.peso}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_factor}" value="#{bundle.ArticulosTitle_factor}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.factor}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_PMercado1}" value="#{bundle.ArticulosTitle_PMercado1}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.PMercado1}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_PMercado2}" value="#{bundle.ArticulosTitle_PMercado2}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.PMercado2}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_IDVariedad}" value="#{bundle.ArticulosTitle_IDVariedad}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.IDVariedad}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_unidadMed2}" value="#{bundle.ArticulosTitle_unidadMed2}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.unidadMed2}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_unidadMed1}" value="#{bundle.ArticulosTitle_unidadMed1}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.unidadMed1}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_IDGrupoRef}" value="#{bundle.ArticulosTitle_IDGrupoRef}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.IDGrupoRef}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_IDGrupoAlim}" value="#{bundle.ArticulosTitle_IDGrupoAlim}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.IDGrupoAlim}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText title="#{bundle.ArticulosTitle_IDDonante}" value="#{bundle.ArticulosTitle_IDDonante}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.IDDonante}"/>
+                    </p:column>
+                </p:dataTable>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

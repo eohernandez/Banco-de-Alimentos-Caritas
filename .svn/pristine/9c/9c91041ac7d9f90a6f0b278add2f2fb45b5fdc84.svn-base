@@ -1,0 +1,188 @@
+package com.caritas.security;
+
+import com.caritas.controller.util.JsfUtil;
+import com.caritas.entity.Accesos;
+import com.caritas.entity.Usuarios;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.faces.application.NavigationHandler;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.event.PhaseEvent;
+import javax.faces.event.PhaseId;
+import javax.faces.event.PhaseListener;
+import javax.servlet.http.HttpSession;
+
+public class AuthorizationListener implements PhaseListener {
+
+    private static final Logger LOG = Logger.getLogger(AuthorizationListener.class.getName());
+    private static final ResourceBundle view2form = ResourceBundle.getBundle("/view2frm");
+    private static final ResourceBundle msg = ResourceBundle.getBundle("/Bundle");
+    private static final String LOGIN_REDIRECT = "/login.xhtml?faces-redirect=true";
+    private static final String INDEX_REDIRECT = "/index.xhtml?faces-redirect=true";
+    private static final Set<String> globalAllowedIds = new HashSet<String>(
+            Arrays.asList(new String[]{"/index.xhtml", "/login.xhtml"}));
+
+    private static boolean isAuthorized(FacesContext context) {
+        Map<String, Accesos> frmAccessMap;
+        boolean isInFrmAccessMap;
+        String frmId;
+        String viewId = context.getViewRoot().getViewId();
+
+        if (globalAllowedIds.contains(viewId)) {
+            return true;
+        }
+        try {
+            frmId = view2form.getString(viewId);
+            frmAccessMap = getFormAccessMap(context.getExternalContext());
+            isInFrmAccessMap = frmAccessMap.containsKey(frmId);
+            return isInFrmAccessMap;
+        } catch (MissingResourceException mre) {
+            /**
+             * No se especificó un frmId correspondiente al viewId actual. Por
+             * el momento no se le da seguridad. El frmId es con lo que se
+             * identifica en la tabla Formularios.
+             */
+            LOG.log(Level.WARNING, "{0}: {1} no tiene un frmId correspondiente.",
+                    new Object[]{
+                AuthorizationListener.class.getCanonicalName(),
+                viewId
+            });
+            return true;
+        } catch (MissingAccessMapException e) {
+            /**
+             * Este viene cuando el frmAccessMap todavía no se ha creado: El
+             * usuario aún no se autentifica. Por lo que no se le da acceso a la
+             * página.
+             */
+            return false;
+        } catch (NullPointerException e) {
+            return false;
+        }
+    }
+
+    /**
+     *
+     * @param ec
+     * @return
+     */
+    public static Map<String, Accesos> getMenuAccessMap(ExternalContext ec) {
+        Map<String, Object> sessionMap = ec.getSessionMap();
+        return (Map<String, Accesos>) sessionMap.get("menuAccessMap");
+    }
+
+    /**
+     * Este mapa es un cache de la query a BD de dbo.Accessos where IDNivel =
+     * [El nivel del usuario logeado].
+     * <br />
+     * Cuando no se encuentra en la sesión este mapa se asume que no esta
+     * autenticado.
+     *
+     * @param ec El externalContext de FacesContext
+     * @return Map de FormId a Acceso.
+     * @throws MissingAccessMapException cuando no se encuentra en la session.
+     */
+    public static Map<String, Accesos> getFormAccessMap(ExternalContext ec) throws MissingAccessMapException {
+        Map<String, Object> sessionMap = ec.getSessionMap();
+        Map<String, Accesos> accesos = (Map<String, Accesos>) sessionMap.get("formAccessMap");
+        if (accesos == null) {
+            throw new MissingAccessMapException();
+        }
+        return accesos;
+    }
+
+    /**
+     * Se efectúa la autorización. Redirige a /index.xhtml si no se autorizado,
+     * o a login si no esta autenticado.
+     *
+     * @param event
+     */
+    @Override
+    public void afterPhase(PhaseEvent event) {
+        FacesContext facesContext;
+        NavigationHandler nh;
+        String currentPage;
+        boolean isLoginPage;
+        boolean isCurrentUserNull;
+        facesContext = event.getFacesContext();
+        currentPage = facesContext.getViewRoot().getViewId();
+        nh = facesContext.getApplication().getNavigationHandler();
+
+        isLoginPage = (currentPage.lastIndexOf("login.xhtml") > -1);
+        isCurrentUserNull = (getCurrentUser(facesContext) == null);
+
+        NavCase navCase = NavCase.calcCase(isLoginPage, !isCurrentUserNull);
+        switch (navCase) {
+            case NoLoggedNoLogin:
+                nh.handleNavigation(facesContext, null, LOGIN_REDIRECT);
+                break;
+            case LoggedInLogin:
+                nh.handleNavigation(facesContext, null, INDEX_REDIRECT);
+                break;
+            case LoggedNoLogin:
+                if (!isAuthorized(facesContext)) {
+                    JsfUtil.addErrorMessage(msg.getString("ErrorNotAuthorized"));
+                    nh.handleNavigation(facesContext, null, "/index.xhtml");
+                }
+                break;
+            case NoLoggedInLogin:
+                break;
+            default:
+                throw new AssertionError();
+        }
+
+    }
+
+    private Usuarios getCurrentUser(FacesContext facesContext) {
+        Object currentUser;
+        HttpSession session;
+        session = (HttpSession) facesContext.getExternalContext().getSession(true);
+        currentUser = session.getAttribute("username");
+        return (Usuarios) currentUser;
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @Override
+    public void beforePhase(PhaseEvent event) {
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public PhaseId getPhaseId() {
+        return PhaseId.RESTORE_VIEW;
+    }
+
+    static class MissingAccessMapException extends Exception {
+    }
+
+    enum NavCase {
+
+        NoLoggedNoLogin, LoggedInLogin, LoggedNoLogin, NoLoggedInLogin;
+
+        private static NavCase calcCase(boolean loginPage, boolean loggedUser) {
+            if (!loginPage && loggedUser) {
+                return NavCase.LoggedNoLogin;
+            } else if (loginPage && !loggedUser) {
+                return NavCase.NoLoggedInLogin;
+            } else if (!loginPage && !loggedUser) {
+                return NavCase.NoLoggedNoLogin;
+            } else if (loginPage && loggedUser) {
+                return NavCase.LoggedInLogin;
+            } else {
+                return NavCase.NoLoggedNoLogin;
+            }
+        }
+    }
+}

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.EditAccesosTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_subMenu}" for="subMenu" />
+                    <h:inputText id="subMenu" value="#{accesosController.selected.subMenu}" title="#{bundle.EditAccesosTitle_subMenu}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_subMenu}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_nuevo}" for="nuevo" />
+                    <h:inputText id="nuevo" value="#{accesosController.selected.nuevo}" title="#{bundle.EditAccesosTitle_nuevo}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_nuevo}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_editar}" for="editar" />
+                    <h:inputText id="editar" value="#{accesosController.selected.editar}" title="#{bundle.EditAccesosTitle_editar}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_editar}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_borrar}" for="borrar" />
+                    <h:inputText id="borrar" value="#{accesosController.selected.borrar}" title="#{bundle.EditAccesosTitle_borrar}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_borrar}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_grabar}" for="grabar" />
+                    <h:inputText id="grabar" value="#{accesosController.selected.grabar}" title="#{bundle.EditAccesosTitle_grabar}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_grabar}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_cancelar}" for="cancelar" />
+                    <h:inputText id="cancelar" value="#{accesosController.selected.cancelar}" title="#{bundle.EditAccesosTitle_cancelar}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_cancelar}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_imprimir}" for="imprimir" />
+                    <h:inputText id="imprimir" value="#{accesosController.selected.imprimir}" title="#{bundle.EditAccesosTitle_imprimir}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_imprimir}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_IDAccesos}" for="IDAccesos" />
+                    <h:inputText id="IDAccesos" value="#{accesosController.selected.IDAccesos}" title="#{bundle.EditAccesosTitle_IDAccesos}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_IDAccesos}"/>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_IDNivel}" for="IDNivel" />
+                    <h:selectOneMenu id="IDNivel" value="#{accesosController.selected.IDNivel}" title="#{bundle.EditAccesosTitle_IDNivel}" >
+                        <f:selectItems value="#{nivelAccesoController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.EditAccesosLabel_IDForm}" for="IDForm" />
+                    <h:selectOneMenu id="IDForm" value="#{accesosController.selected.IDForm}" title="#{bundle.EditAccesosTitle_IDForm}" required="true" requiredMessage="#{bundle.EditAccesosRequiredMessage_IDForm}">
+                        <f:selectItems value="#{formulariosController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+                <h:commandLink action="#{accesosController.update}" value="#{bundle.EditAccesosSaveLink}"/>
+                <br />
+                <br />
+                <h:commandLink action="View" value="#{bundle.EditAccesosViewLink}" immediate="true"/>
+                <br />
+                <h:commandLink action="#{accesosController.prepareList}" value="#{bundle.EditAccesosShowAllLink}" immediate="true"/>
+                <br />
+                <br />
+                <h:commandLink value="#{bundle.EditAccesosIndexLink}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

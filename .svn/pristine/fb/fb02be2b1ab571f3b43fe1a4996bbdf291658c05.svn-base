@@ -1,0 +1,63 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.caritas.controller.util.noRowController;
+
+import com.caritas.controller.util.JsfUtil;
+
+/**
+ *
+ * @param <T>
+ * @author talento
+ */
+public class DefaultNoRowController<T> implements NoRowControlable {
+
+    protected T current;
+
+    @Override
+    public String prepareViewNoRow() {
+        current = null;
+        return "View";
+    }
+
+    @Override
+    public String prepareEditNoRow() {
+        if (current == null) {
+            JsfUtil.addErrorMessage("No hay registro seleccionado");
+            return null;
+        }
+        return "Edit";
+    }
+
+    public boolean destroyValidate() {
+        return true;
+    }
+
+    /**
+     * Este es una funcion dummy. Esta funcion no borra ningun dato en la BD. Se
+     * debe implementar debidamente en las subclases
+     *
+     * @return "List" si fue posibe borrar el dato, null si no.
+     */
+    @Override
+    public String destroyNoRow() {
+        JsfUtil.addErrorMessage("Sobrecarga el metodo destroyNoRow()");
+        if (current == null) {
+            JsfUtil.addErrorMessage("Seleccione un dato a dar de Baja");
+            return null;
+        }
+        if (destroyValidate()) {
+            current = null;
+            return "List";
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String prepareList() {
+        current = null;
+        return "List";
+    }
+}

@@ -1,0 +1,182 @@
+package com.caritas.controller;
+
+import com.caritas.controller.util.noRowController.NoRowControlable;
+import com.caritas.entity.Articulos;
+import com.caritas.entity.Donantes;
+import com.caritas.entity.GrupoAlim;
+import com.caritas.entity.GrupoRef;
+import com.caritas.entity.Variedad;
+import com.caritas.facade.ArticulosFacade;
+import com.caritas.filters.ArticulosFilters;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
+import org.primefaces.model.LazyDataModel;
+import org.primefaces.model.SortOrder;
+
+/**
+ *
+ * @author software
+ */
+@ManagedBean
+@ViewScoped
+public class ArticulosList implements NoRowControlable, Serializable {
+
+    @EJB private ArticulosFacade articulos;
+    private ArticulosFilters filtros;
+    @ManagedProperty("#{articulosSelected}")
+    private ArticulosSelected selectedBean;
+    private LazyDataModel<Articulos> items = new LazyDataModel<Articulos>() {
+        @Override
+        public List<Articulos> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, String> filters) {
+            setRowCount(articulos.count(filtros));
+            return articulos.find(filtros, first, pageSize);
+        }
+    };
+
+    //<editor-fold defaultstate="collapsed" desc="init">
+    public ArticulosList() {
+    }
+
+    @PostConstruct
+    private void initialize() {
+        items.setRowCount(articulos.count());
+        filtros = new ArticulosFilters();
+    }
+
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Getters/Setters">
+    public ArticulosFilters getFilters() {
+        return filtros;
+    }
+
+    public void setFilters(ArticulosFilters filters) {
+        this.filtros = filters;
+    }
+    
+    public LazyDataModel<Articulos> getItems() {
+        return items;
+    }
+
+    public Articulos getSelected() {
+        return selectedBean.getSelected();
+    }
+
+    public void setSelected(Articulos selected) {
+        this.selectedBean.setSelected(selected);
+    }
+
+    public void setSelectedBean(ArticulosSelected selectedBean) {
+        this.selectedBean = selectedBean;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="NoRow">
+    @Override
+    public String prepareList() {
+        return "List";
+    }
+
+    @Override
+    public String prepareViewNoRow() {
+        setSelected(null);
+        return "View";
+    }
+
+    @Override
+    public String prepareEditNoRow() {
+        return "Edit";
+    }
+
+    @Override
+    public String destroyNoRow() {
+        if (articulos.find(getSelected().getIDArticulo()) != null) {
+            articulos.remove(getSelected());
+            setSelected(null);
+        } 
+        return "List";
+    }
+
+    public String create() {
+        articulos.create(getSelected());
+        return "List";
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Row">
+    public String prepareCreate() {
+        Articulos articulos1 = new Articulos();
+        articulos1.setIDDonante(new Donantes("0"));
+        articulos1.setIDGrupoAlim(new GrupoAlim("0"));
+        articulos1.setIDVariedad(new Variedad("0"));
+        articulos1.setIDGrupoRef(new GrupoRef("0"));
+
+        articulos1.setCostoBenef1(0.0);
+        articulos1.setCuotaRecup1(0.0);
+        articulos1.setReorden1(0.0);
+
+        articulos1.setCostoBenef2(0.0);
+        articulos1.setCuotaRecup2(0.0);
+        articulos1.setReorden2(0.0);
+
+        articulos1.setCantidadUni(1.0);
+        articulos1.setPeso(0.0);
+        setSelected(articulos1);
+        return "Create";
+    }
+    public String prepareView() {
+        setSelected(items.getRowData());
+        return "View";
+    }
+    public String prepareEdit() {
+        setSelected(items.getRowData());
+        return "Edit";
+    }
+    public String destroy() {
+        Articulos rowData = items.getRowData();
+        if (articulos.find(rowData.getIDArticulo()) != null) {
+            articulos.remove(rowData);
+            setSelected(null);
+        }
+        return "List";
+    }
+    //</editor-fold>
+
+    @ManagedBean(name = "articulosCompleter")
+    @ApplicationScoped
+    public static class ArticulosCompleter {
+
+        @ManagedProperty("#{parametersController.suggestionLength}")
+        private int length;
+        @EJB
+        private ArticulosFacade articulos;
+
+        public List<Articulos> complete(String query) {
+            return articulos.findLike(query, length);
+        }
+
+        public void setLength(int length) {
+            this.length = length;
+        }
+    }
+    
+    @ManagedBean(name = "articulosSelected")
+    @SessionScoped
+    public static class ArticulosSelected {
+        private Articulos selected;
+
+        public Articulos getSelected() {
+            return selected;
+        }
+
+        public void setSelected(Articulos selected) {
+            this.selected = selected;
+        }
+
+    }
+}
