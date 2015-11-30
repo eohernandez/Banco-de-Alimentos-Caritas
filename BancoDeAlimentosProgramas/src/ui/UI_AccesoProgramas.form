@@ -170,7 +170,6 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/Exit.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="jButton1"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="jButton7">
@@ -178,7 +177,6 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/Cancel.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="jButton1"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="jButton8">
@@ -186,15 +184,16 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/Save.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="jButton1"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton8ActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="jButton9">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/Delete.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="jButton1"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="jButton10">
@@ -202,7 +201,6 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/Add.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="jButton1"/>
       </Properties>
     </Component>
   </SubComponents>

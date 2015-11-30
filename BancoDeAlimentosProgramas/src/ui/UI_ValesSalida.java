@@ -105,9 +105,9 @@ public class UI_ValesSalida extends javax.swing.JFrame {
 
         jComboBox3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jLabel8.setText("jLabel8");
+        jLabel8.setText("Area");
 
-        jLabel9.setText("jLabel9");
+        jLabel9.setText("Programa");
 
         jComboBox4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 

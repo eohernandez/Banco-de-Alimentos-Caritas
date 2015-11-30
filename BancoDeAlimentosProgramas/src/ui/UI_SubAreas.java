@@ -45,22 +45,16 @@ public class UI_SubAreas extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButton6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Add.png"))); // NOI18N
-        jButton6.setText("jButton1");
 
         jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Edit.png"))); // NOI18N
-        jButton5.setText("jButton1");
 
         jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Delete.png"))); // NOI18N
-        jButton4.setText("jButton1");
 
         jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Save.png"))); // NOI18N
-        jButton3.setText("jButton1");
 
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Cancel.png"))); // NOI18N
-        jButton2.setText("jButton1");
 
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Exit.png"))); // NOI18N
-        jButton1.setText("jButton1");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("SubAreas"));
         jPanel2.setName("Areas"); // NOI18N
