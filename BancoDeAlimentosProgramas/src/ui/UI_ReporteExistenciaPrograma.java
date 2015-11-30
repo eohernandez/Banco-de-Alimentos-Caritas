@@ -34,7 +34,7 @@ public class UI_ReporteExistenciaPrograma extends javax.swing.JFrame {
         jComboBox1 = new javax.swing.JComboBox<String>();
         jComboBox2 = new javax.swing.JComboBox<String>();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Exit.png"))); // NOI18N
 

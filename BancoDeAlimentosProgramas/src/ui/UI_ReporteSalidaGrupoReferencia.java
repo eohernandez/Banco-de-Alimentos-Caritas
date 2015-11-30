@@ -39,7 +39,7 @@ public class UI_ReporteSalidaGrupoReferencia extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jComboBox3 = new javax.swing.JComboBox<String>();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Exit.png"))); // NOI18N
 
